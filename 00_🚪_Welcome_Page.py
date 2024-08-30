@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 st.set_page_config(
-    page_title = "Churn Predictor",
+    page_title = "Welcome Page",
     page_icon = "assets/app_icon.svg",
     layout = "wide",
     initial_sidebar_state = "expanded"
