@@ -1,11 +1,9 @@
 # pages/01_🏡_Home.py
 import streamlit as st
-import numpy as np
-import pandas as pd
 
 st.set_page_config(
     page_title = "Customer Churn Prediction - Home",
-    page_icon = "assets/app_icon.svg",
+    page_icon = "🏡",
     layout = "wide")
 
 st.title("About the Customer Churn Prediction App")
