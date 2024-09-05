@@ -9,14 +9,6 @@ st.set_page_config(
     initial_sidebar_state = "expanded"
 )
 
-st.title("Customer Churn Prediction App")
-
-# Display the customer icon/picture
-
-st.image("assets/c_churn_1.png", width = 1000)
-
-# Welcome Message
-
 # Add custom CSS to adjust the width of the sidebar
 st.markdown("""
     <style> 
@@ -26,8 +18,15 @@ st.markdown("""
     </style> 
 """, unsafe_allow_html = True)
 
+# Main function for the welcome page
 def main():
-    st.header('Customer Churn Prediction App')
+    st.title("Customer Churn Prediction App")
+    
+    # Display the customer icon/picture
+    st.image("assets/c_churn_1.png", width = 1000)
+
+    # Welcome Message
+    st.header('Welcome to the Customer Churn Prediction App')
 
     st.write(
         """
