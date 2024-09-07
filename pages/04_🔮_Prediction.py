@@ -33,7 +33,7 @@ with column1:
 # Define file paths
 local_model1_path = './models/gradient_boosting_model.pkl'
 local_model2_path = './models/random_forest_model.pkl'
-local_encoder_path = './models/encoder.joblib'
+local_encoder_path = './models/OneHotEncoder.joblib'
 
 # -------- Function to load the model from local files
 @st.cache_resource(show_spinner = "Loading model")
