@@ -21,7 +21,7 @@ st.image("assets/c_churn_4.jpeg", width = 1000, caption = "Are you Churning?")
 # --------- Add custom CSS to adjust the width of the sidebar
 st.markdown(""" 
     <style> 
-        section[data-testid="stSidebar"] { width: 200px !important; }
+        section[data-testid = "stSidebar"] { width: 200px !important; }
     </style> """, unsafe_allow_html = True)
 
 st.title("Predict Customer Churn!")
@@ -67,10 +67,17 @@ class TotalCharges_cleaner(BaseEstimator, TransformerMixin):
         return self
         
     def transform(self, X):
-        # Replace empty string with NA
+        # Replace empty string with NaN
         X['TotalCharges'].replace(' ', np.nan, inplace = True)
+        
+        # Fill NaN values with a default or average value, or handle as desired
+        X['TotalCharges'].fillna(0, inplace = True)  # Replace with 0 or an appropriate value
+        
         # Convert the values in the TotalCharges column to a float
-        X['TotalCharges'] = X['TotalCharges'].astype(float)
+        try:
+            X['TotalCharges'] = X['TotalCharges'].astype(float)
+        except ValueError as e:
+            st.error(f"Error converting 'TotalCharges': {e}")
         return X
         
     def __getstate__(self):
@@ -116,28 +123,28 @@ for key in session_keys:
         st.session_state[key] = ""
 
 # ------- Create a function to make prediction
-def make_prediction(model):
+def make_prediction(model, encoder):
     # Extract input data from session state
-    CustomerID = st.session_state['CustomerID']
-    Gender = st.session_state['Gender']
-    SeniorCitizen = st.session_state['SeniorCitizen']
-    Partner = st.session_state['Partners']
-    Dependents = st.session_state['Dependents']
-    Tenure = st.session_state['Tenure']
-    PhoneService = st.session_state['PhoneService']
-    MultipleLines = st.session_state['MultipleLines']
-    InternetService = st.session_state['InternetService']
-    OnlineSecurity = st.session_state['OnlineSecurity']
-    OnlineBackup = st.session_state['OnlineBackup']
-    DeviceProtection = st.session_state['DeviceProtection']
-    TechSupport = st.session_state['TechSupport']
-    StreamingTV = st.session_state['StreamingTV']
-    StreamingMovies = st.session_state['StreamingMovies']
-    Contract = st.session_state['Contract']
-    PaperlessBilling = st.session_state['PaperlessBilling']
-    PaymentMethod = st.session_state['PaymentMethod']
-    MonthlyCharges = st.session_state['MonthlyCharges']
-    TotalCharges = st.session_state['TotalCharges']
+    CustomerID = st.session_state.get('CustomerID', '')
+    Gender = st.session_state.get('Gender', '')
+    SeniorCitizen = st.session_state.get('SeniorCitizen', '')
+    Partner = st.session_state.get('Partner', '')
+    Dependents = st.session_state.get('Dependents', '')
+    Tenure = st.session_state.get('Tenure', '')
+    PhoneService = st.session_state.get('PhoneService', '')
+    MultipleLines = st.session_state.get('MultipleLines', '')
+    InternetService = st.session_state.get('InternetService', '')
+    OnlineSecurity = st.session_state.get('OnlineSecurity', '')
+    OnlineBackup = st.session_state.get('OnlineBackup', '')
+    DeviceProtection = st.session_state.get('DeviceProtection', '')
+    TechSupport = st.session_state.get('TechSupport', '')
+    StreamingTV = st.session_state.get('StreamingTV', '')
+    StreamingMovies = st.session_state.get('StreamingMovies', '')
+    Contract = st.session_state.get('Contract', '')
+    PaperlessBilling = st.session_state.get('PaperlessBilling', '')
+    PaymentMethod = st.session_state.get('PaymentMethod', '')
+    MonthlyCharges = st.session_state.get('MonthlyCharges', '')
+    TotalCharges = st.session_state.get('TotalCharges', '')
 
      # Define column names  
     columns = ['CustomerID', 'Gender', 'SeniorCitizen', 'Partner', 'Dependents', 'Tenure',
@@ -145,7 +152,7 @@ def make_prediction(model):
                 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies',
                 'Contract', 'PaperlessBilling', 'PaymentMethod', 'MonthlyCharges', 'TotalCharges']
 
-    # Create a DataFrame with input values  
+     # Create a DataFrame with input values  
     values = [[CustomerID, Gender, SeniorCitizen, Partner, Dependents, Tenure, PhoneService,
             MultipleLines, InternetService, OnlineSecurity, OnlineBackup, DeviceProtection,
             TechSupport, StreamingTV, StreamingMovies, Contract, PaperlessBilling,
@@ -153,24 +160,43 @@ def make_prediction(model):
         
     data = pd.DataFrame(values, columns = columns)
 
-    # Get the value for prediction
-    prediction = model.predict(data)
-    prediction = encoder.inverse_transform(prediction)
-    st.session_state['prediction'] = prediction
+    # Handle empty strings and missing values for numeric columns
+    numeric_columns = ['Tenure', 'MonthlyCharges', 'TotalCharges']
 
-    # Get the value for prediction probability
-    prediction_proba = model.predict_proba(data)
-    st.session_state['prediction_proba'] = prediction_proba
+    # Replace empty strings with NaN and convert numeric columns to float
+    data[numeric_columns] = data[numeric_columns].replace('', np.nan)  # Replace empty strings with NaN
+    data[numeric_columns] = data[numeric_columns].apply(pd.to_numeric, errors = 'coerce')  # Convert to numeric, force errors to NaN        # Convert columns to float
+    
+    # Fill NaN values with a default value or an appropriate strategy (like 0 or mean)
+    data['TotalCharges'].fillna(data['TotalCharges'].mean(), inplace = True)
+    data['MonthlyCharges'].fillna(data['MonthlyCharges'].mean(), inplace = True)
+    data['Tenure'].fillna(0, inplace = True)  # Fill tenure with 0 if empty
 
-    data['Churn'] = prediction
-    data['Model'] = model_option
+    try:
+        # Get the value for prediction
+        prediction = model.predict(data)
+        prediction = encoder.inverse_transform(prediction)
+        st.session_state['prediction'] = prediction
 
-    if not os.path.exists('./data'):
-        os.makedirs('./data')
+        # Get the value for prediction probability
+        prediction_proba = model.predict_proba(data)
+        st.session_state['prediction_proba'] = prediction_proba
+
+        # Append the prediction and model used to the data
+        data['Churn'] = prediction
+        data['Model'] = model_option
+
+        # Save the prediction history
+        if not os.path.exists('./data'):
+            os.makedirs('./data')
         
-    data.to_csv('./data/history.csv', mode = 'a', header = not os.path.exists('./data/history.csv'), index = False)
+        data.to_csv('./data/history.csv', mode = 'a', header = not os.path.exists('./data/history.csv'), index = False)
 
-    return prediction, prediction_proba
+        return prediction, prediction_proba
+    
+    except ValueError as e:
+        st.error(f"An error occurred: {e}")
+        st.write("Please check the input values and try again.")
 
 # ------- Prediction page creation
 def input_features():
