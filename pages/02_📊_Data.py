@@ -47,7 +47,7 @@ def data_page():
     # ---- Load remote dataset
     @st.cache_data(show_spinner = 'Loading data')
     def load_data():
-        df = pd.read_csv('C:\\Users\\HP\\AzubiCA\\Career Accelerator\\LP4\\Customer_Churn_Predictor\\data\\Final_Merged_Data.csv')
+        df = pd.read_csv('C:\\Users\\HP\\AzubiCA\\Career Accelerator\\LP4\\Customer_Churn_Predictor\\data\\Datase.csv')
         return df
 
     df = load_data().head(100)
