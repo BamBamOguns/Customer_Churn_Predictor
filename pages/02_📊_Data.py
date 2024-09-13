@@ -48,7 +48,7 @@ def data_page():
     @st.cache_data(show_spinner = 'Loading data')
     def load_data():
         # Update the file path to a relative path within the project directory
-        df = pd.read_csv('C:/Users/HP/AzubiCA/Career Accelerator/LP4/Customer_Churn_Predictor/data/Final_Merged_Data_Cleaned.csv')
+        df = pd.read_csv('data/final_merged_cleaned.csv')
         return df
 
     # Load data and display the first 100 rows
