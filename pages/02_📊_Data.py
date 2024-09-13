@@ -44,15 +44,17 @@ def data_page():
         option = st.selectbox('Choose columns to be viewed',
                               ('All Columns', 'Numeric Columns', 'Categorical Columns'))
 
-    # ---- Load remote dataset
+    # ---- Load dataset function
     @st.cache_data(show_spinner = 'Loading data')
     def load_data():
-        df = pd.read_csv('C:\\Users\\HP\\AzubiCA\\Career Accelerator\\LP4\\Customer_Churn_Predictor\\data\\Final_Merged_Data_Cleaned.csv')
+        # Update the file path to a relative path within the project directory
+        df = pd.read_csv('C:/Users/HP/AzubiCA/Career Accelerator/LP4/Customer_Churn_Predictor/data/Final_Merged_Data_Cleaned.csv')
         return df
 
+    # Load data and display the first 100 rows
     df = load_data().head(100)
 
-    # Display based on selection
+    # Display data based on user selection
     if option == 'Numeric Columns':
         st.subheader('Numeric Columns')
         st.write(df.select_dtypes(include = 'number'))
